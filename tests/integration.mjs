@@ -47,6 +47,8 @@ ok((await fetch(base+'/api/files/'+photo.id+'?token='+token)).status===200,'Phot
 let unsafe=await call('admin/settings',{method:'POST',headers:owner,data:{services:[{name:'Unsafe',image:'//evil.example/a.jpg',items:[],price:1}]}});ok(unsafe.status===400,'Service images reject external protocol-relative URLs');
 admin=await call('admin',{headers:owner});ok(admin.data.notices.some(n=>n.status==='Awaiting email configuration'),'Unconfigured emails remain visible for manual handling');
 let contacts={...c.data.contact};ok((await call('admin/settings',{method:'POST',headers:owner,data:{contact:contacts}})).status===200&&(await call('config')).data.contact.phone2===contacts.phone2,'Contact settings preserve the second telephone number');
+ok((await call('admin/test-email',{method:'POST',data:{}})).status===403,'Email test rejects anonymous callers');
+ok((await call('admin/test-email',{method:'POST',headers:owner,data:{}})).status===400,'Email test refuses to send without configured authorisation');
 ok((await call('admin/retention')).status===403,'Retention tools reject anonymous access');
 await call('requests/'+id,{method:'PATCH',headers:owner,data:{status:'Completed'}});
 await db.prepare('UPDATE requests SET updated=? WHERE id=?').bind(new Date(Date.now()-400*86400000).toISOString(),id).run();

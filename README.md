@@ -70,3 +70,9 @@ Initial administrator: Thabang, cleaningsolutionstnt@gmail.com. The private Site
 Photos on closed cases are due for deletion after 90 days; completed, cancelled and declined request records and related notification copies after 365 days. Accepted quotations remain unresolved until staff close them. Staff must review the Privacy & retention tab regularly and explicitly run cleanup; no automatic background deletion is configured. Mark a case for a documented ongoing obligation to exclude it from routine cleanup. These operational defaults are not a legal compliance certification.
 
 Gmail implementation references: https://developers.google.com/workspace/gmail/api/guides/sending and https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/send .
+
+## Gmail activation and delivery test
+
+Configure the Gmail OAuth client and authorised mailbox using the send-only scope `https://www.googleapis.com/auth/gmail.send`. Configure the three GMAIL_* credentials as hosting secrets and redeploy. The Notifications tab includes an authorised test-email action, restricted to the TNT mailbox. The test reports provider acceptance; a human must verify Inbox/Spam receipt. While credentials are missing, no test message is sent.
+
+Google Cloud setup must be performed by an account owner with access to the TNT mailbox. OAuth client secrets and refresh tokens must not be posted to chat or committed to GitHub. An OAuth app left in Testing can issue Gmail refresh tokens that expire after seven days; use a suitable production authorisation configuration for launch.
