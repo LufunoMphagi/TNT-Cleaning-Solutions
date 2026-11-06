@@ -33,7 +33,7 @@ These are the default contact settings; authorised staff can update them in the 
 2. Review the preconfigured TNT contact details and add privacy contact/retention details under Settings.
 3. Add confirmed prices, or leave services quote-based.
 4. Add staff members. Portal administrators can access all customer records. Private Sites also require platform visitor permission.
-5. Configure RESEND_API_KEY and EMAIL_FROM (a verified sender) as hosting runtime secrets. OWNER_EMAIL is already set in hosting. Redeploy after changing runtime configuration.
+5. To send from cleaningsolutionstnt@gmail.com, enable the Gmail API in a Google Cloud project and authorise that mailbox with the gmail.send scope. Configure GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET and GMAIL_REFRESH_TOKEN as hosting runtime secrets; GMAIL_FROM defaults to the TNT mailbox. Use a production OAuth configuration rather than a short-lived testing authorisation. Do not paste credentials into chat or commit them. Redeploy after configuration. Alternatively, use the existing Resend adapter with a verified sender. OWNER_EMAIL is already configured.
 6. Check the Notifications tab; retry pending messages when email delivery is configured.
 7. The current private audience is preserved. The owner must explicitly request public access before customers outside the allowlist can visit.
 
@@ -54,3 +54,19 @@ Local development secrets belong in ignored `.dev.vars`. Never commit credential
 [Repository](https://github.com/LufunoMphagi/TNT-Cleaning-Solutions) · [Website](https://tnt-cleaning-solutions.groovynorth.chatgpt.site)
 
 The repository includes a GitHub Actions workflow for JavaScript syntax, TypeScript, isolated integration tests and the production build. Hosting secrets and customer database/photo contents are excluded from Git. A source push alone does not publish a new Sites version.
+
+## Approved launch rules
+
+- All services are quote-based.
+- At least 24 hours before the start of the requested booking window.
+- Daily availability, including public holidays, subject to TNT confirmation.
+- Free cancellation/rescheduling with at least 24 hours’ notice; contact TNT for later changes. Any charge must be agreed before application.
+- Travel charges and location restrictions must appear in the quotation before acceptance.
+
+Initial administrator: Thabang, cleaningsolutionstnt@gmail.com. The private Site access policy must also allow this email before he can visit.
+
+## Retention operations
+
+Photos on closed cases are due for deletion after 90 days; completed, cancelled and declined request records and related notification copies after 365 days. Accepted quotations remain unresolved until staff close them. Staff must review the Privacy & retention tab regularly and explicitly run cleanup; no automatic background deletion is configured. Mark a case for a documented ongoing obligation to exclude it from routine cleanup. These operational defaults are not a legal compliance certification.
+
+Gmail implementation references: https://developers.google.com/workspace/gmail/api/guides/sending and https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/send .
