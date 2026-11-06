@@ -20,7 +20,7 @@ jobs:
       - name: Type checking
         run: npx tsc --noEmit
       - name: Staff sessions and email errors
-        run: node --experimental-strip-types --test tests/staff-auth.mjs tests/email.mjs
+        run: node --experimental-strip-types --test tests/staff-auth.mjs tests/email.mjs tests/feedback.mjs
       - name: Booking and access integration tests
         run: node tests/integration.mjs
       - name: Production build
