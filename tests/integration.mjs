@@ -3,22 +3,23 @@ import {Miniflare} from 'miniflare';
 import {build} from 'esbuild';
 import {readFile} from 'node:fs/promises';
 const bundle=await build({stdin:{contents:"import {GET,POST,PATCH} from './app/api/[[...path]]/route.ts';export default {fetch(request){return ({GET,POST,PATCH}[request.method]||GET)(request)}}",resolveDir:process.cwd(),sourcefile:'test-entry.ts'},bundle:true,write:false,format:'esm',platform:'browser',external:['cloudflare:workers','node:*']});
-const mf=new Miniflare({modules:true,script:bundle.outputFiles[0].text,compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['BUCKET'],bindings:{OWNER_EMAIL:'owner@tnt.test'},cf:false});
+const mf=new Miniflare({modules:true,script:bundle.outputFiles[0].text,compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat'],d1Databases:['DB'],r2Buckets:['BUCKET'],bindings:{OWNER_EMAIL:'owner@tnt.test',ADMIN_PASSWORD:'integration-only-password-123'},cf:false});
 const db=await mf.getD1Database('DB');
 for(let sql of (await readFile('drizzle/0000_classy_frog_thor.sql','utf8')).split('--> statement-breakpoint'))await db.prepare(sql.trim()).run();
 const base='https://tnt.test';
 const fetch=(url,options)=>mf.dispatchFetch(url,options);
 
-const owner={'oai-authenticated-user-id':'local-owner','oai-authenticated-user-email':'owner@tnt.test'};
+let owner={};
 let passed=0;function ok(check,label){assert(check,label);passed++;console.log('PASS',label)}
-async function call(path,{method='GET',data,headers={}}={}){let r=await fetch(base+'/api/'+path,{method,headers:{'Content-Type':'application/json',...headers},body:data?JSON.stringify(data):undefined});return {status:r.status,data:await r.json()}}
+async function call(path,{method='GET',data,headers={}}={}){let r=await fetch(base+'/api/'+path,{method,headers:{'Content-Type':'application/json',Origin:base,...headers},body:data?JSON.stringify(data):undefined});return {status:r.status,data:await r.json(),cookie:r.headers.get('set-cookie')}}
 let c=await call('config');ok(c.status===200&&c.data.services.length===4,'Service configuration loads from server');
 ok(c.data.contact.email==='cleaningsolutionstnt@gmail.com'&&c.data.contact.areas==='Gauteng','Official TNT email and Gauteng coverage load');
 ok(c.data.contact.phone2==='073 760 7697'&&c.data.contact.whatsapp2==='27737607697','Both telephone and WhatsApp contacts load');
 ok((await call('admin')).status===403,'Anonymous visitor cannot access admin');
 ok((await call('admin',{headers:{'oai-authenticated-user-id':'other','oai-authenticated-user-email':'other@tnt.test'}})).status===403,'Signed-in non-staff cannot access admin');
 ok((await call('requests',{method:'POST',data:{type:'booking'}})).status===400,'Invalid booking is rejected');
-ok((await call('admin',{headers:{'oai-authenticated-user-id':'thabang','oai-authenticated-user-email':'cleaningsolutionstnt@gmail.com'}})).status===200,'Thabang is authorised in the initial staff configuration');
+ok((await call('admin',{headers:{'oai-authenticated-user-id':'thabang','oai-authenticated-user-email':'cleaningsolutionstnt@gmail.com'}})).status===403,'Platform identity cannot bypass password sign-in');
+const login=await call('auth/login',{method:'POST',data:{email:'cleaningsolutionstnt@gmail.com',password:'integration-only-password-123'}});ok(login.status===200&&login.cookie,'Password login creates a session');owner={cookie:login.cookie.split(';')[0]};
 const data={type:'booking',name:'Integration customer',email:'integration@example.test',phone:'0000000000',location:'Test city',address:'Test address',service:'Deep cleaning',size:'3 bedrooms',date:new Date(Date.now()+7*86400000).toISOString().slice(0,10),time:'Morning',instructions:'Integration test',consent:true,frequency:'Weekly enquiry'};
 let shortNotice={...data,date:new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Johannesburg'}).format(new Date())};ok((await call('requests',{method:'POST',data:shortNotice})).status===400,'Less than 24 hours notice is rejected');
 let created=await call('requests',{method:'POST',data});ok(created.status===201,'Booking persists as Pending');let {id,token}=created.data;

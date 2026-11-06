@@ -18,7 +18,7 @@ These are the default contact settings; authorised staff can update them in the 
 - Persistent booking, quotation and contact requests with server validation.
 - Private bearer-link request tracking and customer quote acceptance/decline.
 - Private image uploads (JPG/PNG/WebP, 5 MB per photo, 4 customer photos).
-- Server-authorised staff dashboard; owner access configured by OWNER_EMAIL.
+- Password-protected staff dashboard at /staff.
 - Booking statuses, rescheduling, staff assignment and job completion reports.
 - Customer request histories, service and price editing, service image uploads.
 - Weekly, fortnightly and calendar-month follow-up booking creation.
@@ -29,13 +29,13 @@ These are the default contact settings; authorised staff can update them in the 
 
 ## Launch configuration
 
-1. Sign in as the site owner and open Staff portal in the footer.
+1. Open /staff and sign in with the TNT business email and administrator password.
 2. Review the preconfigured TNT contact details and add privacy contact/retention details under Settings.
 3. Add confirmed prices, or leave services quote-based.
-4. Add staff members. Portal administrators can access all customer records. Private Sites also require platform visitor permission.
-5. To send from cleaningsolutionstnt@gmail.com, enable the Gmail API in a Google Cloud project and authorise that mailbox with the gmail.send scope. Configure GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET and GMAIL_REFRESH_TOKEN as hosting runtime secrets; GMAIL_FROM defaults to the TNT mailbox. Use a production OAuth configuration rather than a short-lived testing authorisation. Do not paste credentials into chat or commit them. Redeploy after configuration. Alternatively, use the existing Resend adapter with a verified sender. OWNER_EMAIL is already configured.
+4. Add employees for job assignment. Employee records do not create login accounts.
+5. To send from cleaningsolutionstnt@gmail.com, enable the Gmail API in a Google Cloud project and authorise that mailbox with the gmail.send scope. Configure GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET and GMAIL_REFRESH_TOKEN as hosting runtime secrets; GMAIL_FROM defaults to the TNT mailbox. Use a production OAuth configuration rather than a short-lived testing authorisation. Do not paste credentials into chat or commit them. Redeploy after configuration. Alternatively, use the existing Resend adapter with a verified sender.
 6. Check the Notifications tab; retry pending messages when email delivery is configured.
-7. The current private audience is preserved. The owner must explicitly request public access before customers outside the allowlist can visit.
+7. The marketing website is public; staff records require a valid administrator session.
 
 No payment gateway or paid subscription charging is included. Recurring visits create separate pending bookings for management review. Automatic reminder scheduling is not configured.
 
@@ -80,3 +80,6 @@ Google Cloud setup must be performed by an account owner with access to the TNT 
 ## Custom domain and Google branding
 
 The custom hostname tnt.mphagitech.co.za is registered with Sites, pending DNS validation. Direct routes /privacy and /terms provide the Google branding policy URLs. The whole Site remains private until the owner explicitly authorises public access; Google cannot inspect private pages. After DNS and public access are ready, verify mphagitech.co.za in Google Search Console and use https://tnt.mphagitech.co.za/ as the OAuth homepage, with /privacy and /terms as policy URLs.
+
+## Staff password sign-in
+Set ADMIN_PASSWORD as a hosted secret (16–512 characters) and redeploy. Sign in using cleaningsolutionstnt@gmail.com. No default password exists. To reset, replace the hosted secret and redeploy; existing sessions become invalid. Sessions expire after eight hours and Sign out revokes the current session. Employees listed in the dashboard are assignment records, not separate login accounts.
